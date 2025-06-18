@@ -7,3 +7,8 @@ The app uses a **machine learning model** (Logistic Regression with TF-IDF) to e
 It also provides **personalized recommendations**, such as missing skills, resume improvement tips, and curated **learning resources** from trusted platforms like Coursera, Codecademy, and W3Schools. If the selected role isn’t the best fit, the app suggests **alternative job categories** based on better skill alignment.
 
 All machine learning resources—including the model, encoder, and skill mappings—are stored using `pickle`. The app is simple, interactive, and ideal for **students, job seekers**, or **early-career professionals** preparing for tech roles like **Data Scientist, Software Developer, UI/UX Designer**, and more.
+
+
+
+*** for save of train_model.py is "python train_model.py" ***
+** for to run the "app.py" is streamlit run app.py ***
