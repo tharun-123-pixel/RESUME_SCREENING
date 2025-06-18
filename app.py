@@ -6,18 +6,17 @@ import pickle
 from datetime import datetime
 
 # Cache SpaCy model for performance
+# Load SpaCy model (English)
 @st.cache_resource
 def load_spacy_model():
     try:
         return spacy.load("en_core_web_sm")
-    except Exception as e:
-        st.error(f"Failed to load SpaCy model: {e}")
-        raise e
+    except Exception:
+        spacy.cli.download("en_core_web_sm")  # Auto-download if missing
+        return spacy.load("en_core_web_sm")
 
-try:
-    nlp = load_spacy_model()
-except Exception:
-    st.stop()
+nlp = load_spacy_model()
+
 
 # Load pre-trained model and resources
 try:
