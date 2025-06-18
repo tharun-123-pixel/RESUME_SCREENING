@@ -4,21 +4,15 @@ import re
 import spacy
 import pickle
 from datetime import datetime
-
-# Cache SpaCy model for performance
-# Load SpaCy model (English)
 @st.cache_resource
 def load_spacy_model():
     try:
         return spacy.load("en_core_web_sm")
     except Exception:
-        spacy.cli.download("en_core_web_sm")  # Auto-download if missing
+        spacy.cli.download("en_core_web_sm")
         return spacy.load("en_core_web_sm")
 
 nlp = load_spacy_model()
-
-
-# Load pre-trained model and resources
 try:
     with open('model.pkl', 'rb') as f:
         model = pickle.load(f)
@@ -30,7 +24,6 @@ except Exception as e:
     st.error(f"Failed to load pickle files: {e}. Ensure model.pkl, encoder.pkl, and category_skills.pkl are in the same directory.")
     st.stop()
 
-# Update CATEGORY_SKILLS with new categories
 CATEGORY_SKILLS.update({
     "Frontend Developer": [
         "HTML", "CSS", "JavaScript", "TypeScript", "React", "Next.js", "Vue.js",
@@ -51,7 +44,6 @@ CATEGORY_SKILLS.update({
     ]
 })
 
-# Flatten CATEGORY_SKILLS and include variations + academic terms
 ALL_SKILLS = set()
 for skills in CATEGORY_SKILLS.values():
     ALL_SKILLS.update(skill.lower() for skill in skills)
@@ -61,7 +53,6 @@ ALL_SKILLS.update([
     'algorithms', 'data structures', 'software engineering'
 ])
 
-# Learning resources for skills
 LEARNING_RESOURCES = {
     "python": ["https://www.codecademy.com/learn/learn-python", "https://www.coursera.org/learn/python"],
     "sql": ["https://www.w3schools.com/sql/", "https://www.sqlzoo.net/"],
@@ -280,7 +271,7 @@ def find_best_category(resume_text, category_skills):
         for category, skills in category_skills.items():
             extracted_skills = extract_skills(resume_text, skills)
             score = calculate_resume_score(extracted_skills, skills)
-            # st.write(f"DEBUG: Category {category} scored {score}%")  # Debug logging
+            
             if score > best_score:
                 best_category = category
                 best_score = score
@@ -288,12 +279,12 @@ def find_best_category(resume_text, category_skills):
                 best_target_skills = skills
 
         if best_category is None:
-            # Fallback to model prediction if no skills match
+            
             best_category = predict_category(resume_text)
             best_target_skills = category_skills.get(best_category, [])
             best_extracted_skills = extract_skills(resume_text, best_target_skills)
             best_score = calculate_resume_score(best_extracted_skills, best_target_skills)
-            # st.write(f"DEBUG: Fallback to model prediction: {best_category} with score {best_score}%")
+            
 
         return best_category, best_score, best_extracted_skills, best_target_skills
     except Exception as e:
@@ -303,9 +294,9 @@ def find_best_category(resume_text, category_skills):
 def predict_selection_chance(score, extracted_skills, target_skills, resume_text, selected_category, category_skills):
     """Predict selection chance and provide improvement and safer side recommendations."""
     try:
-        # st.write(f"DEBUG: predict_selection_chance called with category: {selected_category}, score: {score}%")  # Debug logging
+        
 
-        # Define selection chance
+        
         if score > 80:
             chance = "High"
             chance_desc = "Your resume closely matches the requirements, giving a strong chance of selection."
@@ -316,7 +307,7 @@ def predict_selection_chance(score, extracted_skills, target_skills, resume_text
             chance = "Low"
             chance_desc = "Your resume lacks critical skills, reducing selection chances."
 
-        # Improvement recommendations
+       
         missing_skills = [skill for skill in target_skills if skill.lower() not in extracted_skills]
         improvement_tips = []
         if missing_skills:
@@ -326,13 +317,13 @@ def predict_selection_chance(score, extracted_skills, target_skills, resume_text
             improvement_tips.append(f"Highlight skills ({', '.join(extracted_skills)}) in your resume’s skills section or projects.")
         improvement_tips.append("Use ATS-friendly formats with clear headings and job-relevant keywords.")
 
-        # Safer side strategy
+       
         alternative_categories = []
         for category, skills in category_skills.items():
             if category != selected_category:
                 alt_extracted_skills = extract_skills(resume_text, skills)
                 alt_score = calculate_resume_score(alt_extracted_skills, skills)
-                # st.write(f"DEBUG: Alternative category {category} scored {alt_score}%")  # Debug logging
+                
                 alternative_categories.append((category, alt_score))
         alternative_categories = sorted(alternative_categories, key=lambda x: x[1], reverse=True)[:2]
 
@@ -394,27 +385,26 @@ if uploaded_file:
         if resume_text:
             st.success("PDF uploaded and processed successfully!")
 
-            # Extract details
+        
             name = extract_name(resume_text, ALL_SKILLS)
             age = extract_birth_year(resume_text)
             email = extract_email(resume_text)
             phone = extract_phone_number(resume_text)
 
-            # Determine category and skills
+            
             if category_option == "Predict":
                 category, score, extracted_skills, target_skills = find_best_category(resume_text, CATEGORY_SKILLS)
-                # st.write(f"DEBUG: Predicted category: {category} with score {score}%")  # Debug logging
             else:
                 category = category_option
                 target_skills = CATEGORY_SKILLS.get(category, [])
                 extracted_skills = extract_skills(resume_text, target_skills)
                 score = calculate_resume_score(extracted_skills, target_skills)
-                # st.write(f"DEBUG: Selected category: {category} with score {score}%")  # Debug logging
+                
 
-            # Predict selection chance
+           
             selection_info = predict_selection_chance(score, extracted_skills, target_skills, resume_text, category, CATEGORY_SKILLS)
 
-            # Display results
+            
             st.header("📊 Analysis Result")
             st.write(f"🧑 **Name**: {name}")
             st.write(f"📧 **Email**: {email}")
@@ -427,7 +417,7 @@ if uploaded_file:
             st.progress(score / 100)
             st.write(f"🎯 **Selection Chance**: {selection_info['chance']} ({selection_info['chance_description']})")
 
-            # Display recommendations
+            
             st.subheader("🚀 Recommendations")
             st.write("**To Improve Your Resume**:")
             for tip in selection_info['improvement_tips']:
@@ -436,7 +426,7 @@ if uploaded_file:
             for strategy in selection_info['safer_side']:
                 st.write(f"- {strategy}")
 
-            # Learning resources
+
             missing_skills = [skill for skill in target_skills if skill.lower() not in extracted_skills]
             if missing_skills:
                 st.subheader("📚 Recommended Learning Resources")
