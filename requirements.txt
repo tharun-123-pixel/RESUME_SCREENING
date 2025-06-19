@@ -1,6 +1,13 @@
+<<<<<<< HEAD
 pdfplumber
 pandas
 scikit-learn
 streamlit==1.46.0
 spacy==3.8.0
 pdfplumber
+=======
+streamlit
+pdfplumber
+pandas
+scikit-learn
+>>>>>>> 85c488e4310da85196688891b8d7f8435f1da17f
